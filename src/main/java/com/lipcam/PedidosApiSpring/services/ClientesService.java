@@ -44,7 +44,7 @@ public class ClientesService {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Cliente já existente com este CPF"));
 
         entity = _repository.save(new Cliente(addEditRequestDTO.getNome(), addEditRequestDTO.getCpf()));
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ClienteDTO(entity));
+        return ResponseEntity.status(HttpStatus.CREATED).body(entity);
     }
 
     @Transactional

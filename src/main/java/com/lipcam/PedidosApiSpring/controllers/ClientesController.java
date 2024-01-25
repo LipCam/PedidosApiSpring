@@ -3,12 +3,15 @@ package com.lipcam.PedidosApiSpring.controllers;
 import com.lipcam.PedidosApiSpring.dtos.cliente.AddEditClienteRequestDTO;
 import com.lipcam.PedidosApiSpring.dtos.cliente.ClienteDTO;
 import com.lipcam.PedidosApiSpring.dtos.ResponseDTO;
+import com.lipcam.PedidosApiSpring.dtos.produto.AddEditProdutoRequestDTO;
 import com.lipcam.PedidosApiSpring.entities.Cliente;
 import com.lipcam.PedidosApiSpring.services.ClientesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import java.math.BigDecimal;
 
 @RestController
 @RequestMapping(value = "/clientes")
@@ -33,22 +36,18 @@ public class ClientesController {
 
     @PostMapping
     public ResponseEntity add(@RequestBody AddEditClienteRequestDTO addEditRequestDTO) {
-        if (addEditRequestDTO.getNome().isEmpty())
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Campo Nome deve ser preenchido"));
-
-        if (addEditRequestDTO.getCpf().isEmpty())
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Campo CPF deve ser preenchido"));
+        ResponseEntity responseEntity = validaCampos(addEditRequestDTO);
+        if(responseEntity != null)
+            return responseEntity;
 
         return _service.add(addEditRequestDTO);
     }
 
     @PutMapping(value = "/{id}")
     public ResponseEntity edit(@PathVariable Integer id, @RequestBody AddEditClienteRequestDTO addEditRequestDTO) {
-        if (addEditRequestDTO.getNome().isEmpty())
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Campo Nome deve ser preenchido"));
-
-        if (addEditRequestDTO.getCpf().isEmpty())
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Campo CPF deve ser preenchido"));
+        ResponseEntity responseEntity = validaCampos(addEditRequestDTO);
+        if(responseEntity != null)
+            return responseEntity;
 
         ResponseDTO responseDTO = _service.update(id, addEditRequestDTO);
 
@@ -56,6 +55,22 @@ public class ClientesController {
             return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDTO);
+    }
+
+    private ResponseEntity validaCampos(AddEditClienteRequestDTO addEditRequestDTO){
+        if (addEditRequestDTO.getNome() == null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Campo Nome deve ser preenchido"));
+
+        if (addEditRequestDTO.getNome().isEmpty())
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Campo Nome deve ser preenchido"));
+
+        if (addEditRequestDTO.getCpf() == null)
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Campo CPF deve ser preenchido"));
+
+        if (addEditRequestDTO.getCpf().isEmpty())
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Campo CPF deve ser preenchido"));
+
+        return null;
     }
 
     @DeleteMapping(value = "/{id}")
