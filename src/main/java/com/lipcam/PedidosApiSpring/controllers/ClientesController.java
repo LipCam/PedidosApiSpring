@@ -3,15 +3,12 @@ package com.lipcam.PedidosApiSpring.controllers;
 import com.lipcam.PedidosApiSpring.dtos.cliente.AddEditClienteRequestDTO;
 import com.lipcam.PedidosApiSpring.dtos.cliente.ClienteDTO;
 import com.lipcam.PedidosApiSpring.dtos.ResponseDTO;
-import com.lipcam.PedidosApiSpring.dtos.produto.AddEditProdutoRequestDTO;
 import com.lipcam.PedidosApiSpring.entities.Cliente;
 import com.lipcam.PedidosApiSpring.services.ClientesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.math.BigDecimal;
 
 @RestController
 @RequestMapping(value = "/clientes")
