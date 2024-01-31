@@ -1,9 +1,9 @@
 package com.lipcam.PedidosApiSpring.services;
 
 import com.lipcam.PedidosApiSpring.dtos.cliente.AddEditClienteRequestDTO;
-import com.lipcam.PedidosApiSpring.dtos.cliente.ClienteDTO;
+import com.lipcam.PedidosApiSpring.dtos.cliente.ClientesDTO;
 import com.lipcam.PedidosApiSpring.dtos.ResponseDTO;
-import com.lipcam.PedidosApiSpring.entities.Cliente;
+import com.lipcam.PedidosApiSpring.entities.Clientes;
 import com.lipcam.PedidosApiSpring.repositories.ClientesRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -21,7 +21,7 @@ public class ClientesService {
     @Autowired
     ClientesRepository _repository;
 
-    public List<Cliente> findAll(Cliente entity)
+    public List<Clientes> findAll(Clientes entity)
     {
         ExampleMatcher exampleMatcher = ExampleMatcher.matching().withIgnoreCase().withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
         Example example = Example.of(entity, exampleMatcher);
@@ -29,28 +29,28 @@ public class ClientesService {
         return _repository.findAll(example);
     }
 
-    public ClienteDTO findById(Integer Id)
+    public ClientesDTO findById(Integer Id)
     {
-        Cliente entity =_repository.findById(Id).orElse(null);
+        Clientes entity =_repository.findById(Id).orElse(null);
         if(entity != null)
-            return new ClienteDTO(entity);
+            return new ClientesDTO(entity);
         return null;
     }
 
     @Transactional
     public ResponseEntity add(AddEditClienteRequestDTO addEditRequestDTO) {
-        Cliente entity = _repository.findByCpf(addEditRequestDTO.getCpf());
+        Clientes entity = _repository.findByCpf(addEditRequestDTO.getCpf());
         if (entity != null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Cliente já existente com este CPF"));
 
-        entity = _repository.save(new Cliente(addEditRequestDTO.getNome(), addEditRequestDTO.getCpf()));
+        entity = _repository.save(new Clientes(addEditRequestDTO.getNome(), addEditRequestDTO.getCpf()));
         return ResponseEntity.status(HttpStatus.CREATED).body(entity);
     }
 
     @Transactional
     public ResponseDTO update(Integer id, AddEditClienteRequestDTO addEditRequestDTO)
     {
-        Cliente entity = _repository.findById(id).orElse(null);
+        Clientes entity = _repository.findById(id).orElse(null);
         if(entity != null)
         {
             entity.setNome(addEditRequestDTO.getNome());
@@ -63,7 +63,7 @@ public class ClientesService {
 
     @Transactional
     public ResponseDTO delete(Integer id) {
-        Cliente entity = _repository.findById(id).orElse(null);
+        Clientes entity = _repository.findById(id).orElse(null);
 
         if(entity != null) {
             _repository.delete(entity);

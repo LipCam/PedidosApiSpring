@@ -7,7 +7,7 @@ import java.math.BigDecimal;
 
 @Entity
 @Data
-public class Produto {
+public class Produtos {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -18,11 +18,11 @@ public class Produto {
     @Column(name = "preco_unitario")
     private BigDecimal preco;
 
-    public Produto() {
+    public Produtos() {
 
     }
 
-    public Produto(String descricao, BigDecimal preco) {
+    public Produtos(String descricao, BigDecimal preco) {
         this.descricao = descricao;
         this.preco = preco;
     }

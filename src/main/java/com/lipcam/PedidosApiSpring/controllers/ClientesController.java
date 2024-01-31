@@ -1,9 +1,9 @@
 package com.lipcam.PedidosApiSpring.controllers;
 
 import com.lipcam.PedidosApiSpring.dtos.cliente.AddEditClienteRequestDTO;
-import com.lipcam.PedidosApiSpring.dtos.cliente.ClienteDTO;
+import com.lipcam.PedidosApiSpring.dtos.cliente.ClientesDTO;
 import com.lipcam.PedidosApiSpring.dtos.ResponseDTO;
-import com.lipcam.PedidosApiSpring.entities.Cliente;
+import com.lipcam.PedidosApiSpring.entities.Clientes;
 import com.lipcam.PedidosApiSpring.services.ClientesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -18,13 +18,13 @@ public class ClientesController {
     ClientesService _service;
 
     @GetMapping
-    public ResponseEntity findAll(@RequestBody Cliente entity) {
+    public ResponseEntity findAll(@RequestBody Clientes entity) {
         return ResponseEntity.status(HttpStatus.OK).body(_service.findAll(entity));
     }
 
     @GetMapping(value = "/{id}")
     public ResponseEntity findById(@PathVariable Integer id) {
-        ClienteDTO dto = _service.findById(id);
+        ClientesDTO dto = _service.findById(id);
         if (dto != null)
             return ResponseEntity.status(HttpStatus.OK).body(dto);
 

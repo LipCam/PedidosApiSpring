@@ -2,8 +2,8 @@ package com.lipcam.PedidosApiSpring.services;
 
 import com.lipcam.PedidosApiSpring.dtos.ResponseDTO;
 import com.lipcam.PedidosApiSpring.dtos.produto.AddEditProdutoRequestDTO;
-import com.lipcam.PedidosApiSpring.dtos.produto.ProdutoDTO;
-import com.lipcam.PedidosApiSpring.entities.Produto;
+import com.lipcam.PedidosApiSpring.dtos.produto.ProdutosDTO;
+import com.lipcam.PedidosApiSpring.entities.Produtos;
 import com.lipcam.PedidosApiSpring.repositories.ProdutosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -21,7 +21,7 @@ public class ProdutosService {
     @Autowired
     ProdutosRepository _repository;
 
-    public List<Produto> findAll(Produto entity)
+    public List<Produtos> findAll(Produtos entity)
     {
         ExampleMatcher exampleMatcher = ExampleMatcher.matching().withIgnoreCase().withStringMatcher(ExampleMatcher.StringMatcher.CONTAINING);
         Example example = Example.of(entity, exampleMatcher);
@@ -29,28 +29,28 @@ public class ProdutosService {
         return _repository.findAll(example);
     }
 
-    public ProdutoDTO findById(Integer Id)
+    public ProdutosDTO findById(Integer Id)
     {
-        Produto entity =_repository.findById(Id).orElse(null);
+        Produtos entity =_repository.findById(Id).orElse(null);
         if(entity != null)
-            return new ProdutoDTO(entity);
+            return new ProdutosDTO(entity);
         return null;
     }
 
     @Transactional
     public ResponseEntity add(AddEditProdutoRequestDTO addEditRequestDTO) {
-        Produto entity = _repository.findByDescricao(addEditRequestDTO.getDescricao());
+        Produtos entity = _repository.findByDescricao(addEditRequestDTO.getDescricao());
         if (entity != null)
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Produto já existente com esta descrição"));
 
-        entity = _repository.save(new Produto(addEditRequestDTO.getDescricao(), addEditRequestDTO.getPreco()));
+        entity = _repository.save(new Produtos(addEditRequestDTO.getDescricao(), addEditRequestDTO.getPreco()));
         return ResponseEntity.status(HttpStatus.CREATED).body(entity);
     }
 
     @Transactional
     public ResponseDTO update(Integer id, AddEditProdutoRequestDTO addEditRequestDTO)
     {
-        Produto entity = _repository.findById(id).orElse(null);
+        Produtos entity = _repository.findById(id).orElse(null);
         if(entity != null)
         {
             entity.setDescricao(addEditRequestDTO.getDescricao());
@@ -63,7 +63,7 @@ public class ProdutosService {
 
     @Transactional
     public ResponseDTO delete(Integer id) {
-        Produto entity = _repository.findById(id).orElse(null);
+        Produtos entity = _repository.findById(id).orElse(null);
 
         if(entity != null) {
             _repository.delete(entity);

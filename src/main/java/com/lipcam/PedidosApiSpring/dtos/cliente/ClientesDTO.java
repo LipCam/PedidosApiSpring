@@ -1,18 +1,18 @@
 package com.lipcam.PedidosApiSpring.dtos.cliente;
 
-import com.lipcam.PedidosApiSpring.entities.Cliente;
+import com.lipcam.PedidosApiSpring.entities.Clientes;
 import lombok.Data;
 
 @Data
-public class ClienteDTO {
+public class ClientesDTO {
     String Nome;
     String Cpf;
 
-    public  ClienteDTO(){
+    public ClientesDTO(){
 
     }
 
-    public ClienteDTO(Cliente entity) {
+    public ClientesDTO(Clientes entity) {
         Nome = entity.getNome();
         Cpf = entity.getCpf();
     }

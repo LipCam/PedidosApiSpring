@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Entity
 @Data
-public class Cliente {
+public class Clientes {
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -15,11 +15,11 @@ public class Cliente {
     @Column(length = 11)
     String cpf;
 
-    public Cliente() {
+    public Clientes() {
 
     }
 
-    public Cliente(String nome, String cpf) {
+    public Clientes(String nome, String cpf) {
         this.nome = nome;
         this.cpf = cpf;
     }

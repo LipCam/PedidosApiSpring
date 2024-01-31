@@ -2,8 +2,8 @@ package com.lipcam.PedidosApiSpring.controllers;
 
 import com.lipcam.PedidosApiSpring.dtos.ResponseDTO;
 import com.lipcam.PedidosApiSpring.dtos.produto.AddEditProdutoRequestDTO;
-import com.lipcam.PedidosApiSpring.dtos.produto.ProdutoDTO;
-import com.lipcam.PedidosApiSpring.entities.Produto;
+import com.lipcam.PedidosApiSpring.dtos.produto.ProdutosDTO;
+import com.lipcam.PedidosApiSpring.entities.Produtos;
 import com.lipcam.PedidosApiSpring.services.ProdutosService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -20,13 +20,13 @@ public class ProdutosController {
     ProdutosService _service;
 
     @GetMapping
-    public ResponseEntity findAll(@RequestBody Produto entity) {
+    public ResponseEntity findAll(@RequestBody Produtos entity) {
         return ResponseEntity.status(HttpStatus.OK).body(_service.findAll(entity));
     }
 
     @GetMapping(value = "/{id}")
     public ResponseEntity findById(@PathVariable Integer id) {
-        ProdutoDTO dto = _service.findById(id);
+        ProdutosDTO dto = _service.findById(id);
         if (dto != null)
             return ResponseEntity.status(HttpStatus.OK).body(dto);
 

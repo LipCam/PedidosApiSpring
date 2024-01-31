@@ -1,8 +1,8 @@
 package com.lipcam.PedidosApiSpring.repositories;
 
-import com.lipcam.PedidosApiSpring.entities.Produto;
+import com.lipcam.PedidosApiSpring.entities.Produtos;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface ProdutosRepository extends JpaRepository<Produto, Integer> {
-    Produto findByDescricao(String descricao);
+public interface ProdutosRepository extends JpaRepository<Produtos, Integer> {
+    Produtos findByDescricao(String descricao);
 }
