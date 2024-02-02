@@ -29,7 +29,7 @@ public class ProdutosService {
         return _repository.findAll(example);
     }
 
-    public ProdutosDTO findById(Integer Id)
+    public ProdutosDTO findById(Long Id)
     {
         Produtos entity =_repository.findById(Id).orElse(null);
         if(entity != null)
@@ -48,7 +48,7 @@ public class ProdutosService {
     }
 
     @Transactional
-    public ResponseDTO update(Integer id, AddEditProdutoRequestDTO addEditRequestDTO)
+    public ResponseDTO update(Long id, AddEditProdutoRequestDTO addEditRequestDTO)
     {
         Produtos entity = _repository.findById(id).orElse(null);
         if(entity != null)
@@ -62,7 +62,7 @@ public class ProdutosService {
     }
 
     @Transactional
-    public ResponseDTO delete(Integer id) {
+    public ResponseDTO delete(Long id) {
         Produtos entity = _repository.findById(id).orElse(null);
 
         if(entity != null) {

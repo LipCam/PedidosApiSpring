@@ -25,7 +25,7 @@ public class ProdutosController {
     }
 
     @GetMapping(value = "/{id}")
-    public ResponseEntity findById(@PathVariable Integer id) {
+    public ResponseEntity findById(@PathVariable Long id) {
         ProdutosDTO dto = _service.findById(id);
         if (dto != null)
             return ResponseEntity.status(HttpStatus.OK).body(dto);
@@ -59,7 +59,7 @@ public class ProdutosController {
     }
 
     @PutMapping(value = "/{id}")
-    public ResponseEntity edit(@PathVariable Integer id, @RequestBody AddEditProdutoRequestDTO addEditRequestDTO) {
+    public ResponseEntity edit(@PathVariable Long id, @RequestBody AddEditProdutoRequestDTO addEditRequestDTO) {
         ResponseEntity responseEntity = validaCampos(addEditRequestDTO);
         if(responseEntity != null)
             return responseEntity;
@@ -73,7 +73,7 @@ public class ProdutosController {
     }
 
     @DeleteMapping(value = "/{id}")
-    public ResponseEntity delete(@PathVariable Integer id) {
+    public ResponseEntity delete(@PathVariable Long id) {
         ResponseDTO responseDTO = _service.delete(id);
 
         if (responseDTO.getResult().equals("OK"))
