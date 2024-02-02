@@ -20,7 +20,7 @@ public class PedidosItens {
     @Id
     @ManyToOne
     @JoinColumn(name = "pedido_id")
-    private Pedidos pedidos;
+    private Pedidos pedidoId;
 
     @Id
     private Integer itemId;
@@ -32,4 +32,16 @@ public class PedidosItens {
     private Integer quantidade;
     private BigDecimal valorUnitario;
     private BigDecimal valorTotal;
+
+    public PedidosItens() {
+    }
+
+    public PedidosItens(Pedidos pedidoId, Integer itemId, Produtos produtos, Integer quantidade, BigDecimal valorUnitario, BigDecimal valorTotal) {
+        this.pedidoId = pedidoId;
+        this.itemId = itemId;
+        this.produtos = produtos;
+        this.quantidade = quantidade;
+        this.valorUnitario = valorUnitario;
+        this.valorTotal = valorTotal;
+    }
 }

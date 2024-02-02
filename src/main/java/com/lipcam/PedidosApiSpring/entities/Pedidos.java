@@ -12,7 +12,7 @@ import java.util.List;
 public class Pedidos {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    Integer id;
+    Long id;
 
     @ManyToOne
     @JoinColumn(name = "cliente_id")
@@ -24,7 +24,7 @@ public class Pedidos {
     @Column(name = "total", precision = 20, scale = 2)
     private BigDecimal total;
 
-    @OneToMany(mappedBy = "pedidos")
+    @OneToMany(mappedBy = "pedidoId")
     private List<PedidosItens> itens;
 
     public Pedidos() {

@@ -48,35 +48,21 @@ public class PedidosService {
         pedidos.setDataPedido(LocalDate.now());
 
         List<PedidosItens> itemsPedido = converterItens(pedidos, pedidosDTO.getItens());
-        pedidos.setTotal(getSumTotalItens(itemsPedido));
         _pedidosRepository.save(pedidos);
         _pedidosItensRepository.saveAll(itemsPedido);
         pedidos.setItens(itemsPedido);
 
-        return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDTO("OK", "Pedido salvo com sucesso"));
+        atualizaTotalPedido(pedidos);
+
+        pedidosDTO.setIdPedido(pedidos.getId());
+        return ResponseEntity.status(HttpStatus.CREATED).body(pedidosDTO);
+        //return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDTO("OK", "Pedido salvo com sucesso"));
     }
 
-    private List<PedidosItens> converterItens(Pedidos pedidos, List<PedidosItensDTO> lstPedidosItensDTOS) {
-        List<PedidosItens> lst = new ArrayList<>();
-
-        lstPedidosItensDTOS.forEach(item -> {
-            Integer idProduto = item.getIdProduto();
-            Produtos produtos = _produtosRepository
-                    .findById(idProduto)
-                    .orElseThrow(
-                            () -> new RuntimeException("Código de produto inválido: " + idProduto)
-                    );
-
-            PedidosItens pedidosItens = new PedidosItens();
-            pedidosItens.setPedidos(pedidos);
-            pedidosItens.setItemId(lstPedidosItensDTOS.indexOf(item) + 1);
-            pedidosItens.setProdutos(produtos);
-            pedidosItens.setQuantidade(item.getQuantidade());
-            pedidosItens.setValorUnitario(produtos.getPreco());
-            pedidosItens.setValorTotal(new BigDecimal(item.getQuantidade()).multiply(produtos.getPreco()));
-            lst.add(pedidosItens);
-        });
-        return lst;
+    private void atualizaTotalPedido(Pedidos pedidos) {
+        List<PedidosItens> itemsPedido = _pedidosItensRepository.findByPedidoId(pedidos);
+        pedidos.setTotal(getSumTotalItens(itemsPedido));
+        _pedidosRepository.save(pedidos);
     }
 
     private BigDecimal getSumTotalItens(List<PedidosItens> itemsPedido){
@@ -85,6 +71,86 @@ public class PedidosService {
                     return new BigDecimal(itens.getQuantidade()).multiply(itens.getValorUnitario());
                 }
         ).reduce(BigDecimal.ZERO, BigDecimal::add);
+    }
+
+    private List<PedidosItens> converterItens(Pedidos pedidos, List<PedidosItensDTO> lstPedidosItensDTOS) {
+        List<PedidosItens> lst = new ArrayList<>();
+
+        lstPedidosItensDTOS.forEach(item -> {
+            Long idProduto = item.getIdProduto();
+            Produtos produtos = _produtosRepository
+                    .findById(idProduto)
+                    .orElseThrow(
+                            () -> new RuntimeException("Código de produto inválido: " + idProduto)
+                    );
+
+            PedidosItens pedidosItens = new PedidosItens(
+                    pedidos,
+                    lstPedidosItensDTOS.indexOf(item) + 1,
+                    produtos,
+                    item.getQuantidade(),
+                    produtos.getPreco(),
+                    new BigDecimal(item.getQuantidade()).multiply(produtos.getPreco())
+            );
+            lst.add(pedidosItens);
+        });
+        return lst;
+    }
+
+
+    @Transactional
+    public ResponseDTO deletePedido(Long idPedido){
+        Pedidos pedidos = _pedidosRepository.findById(idPedido).orElse(null);
+        if (pedidos == null)
+            return new ResponseDTO("Erro", "Pedido inexistente");
+
+        _pedidosItensRepository.deleteByPedidoId(pedidos);
+        _pedidosRepository.delete(pedidos);
+
+        return new ResponseDTO("OK", "Exclusão realizada com sucesso");
+    }
+
+    @Transactional
+    public ResponseDTO addItemPedido(Long id, PedidosItensDTO pedidosItensDTO) {
+        Pedidos pedidos = _pedidosRepository.findById(id).orElse(null);
+        if (pedidos == null)
+            return new ResponseDTO("Erro", "Pedido inexistente");
+
+        Produtos produtos = _produtosRepository.findById(pedidosItensDTO.getIdProduto()).orElse(null);
+        if (produtos == null)
+            return new ResponseDTO("Erro", "Produto inexistente");
+
+        Integer idItem = _pedidosItensRepository.findMaxIdItemByPedidoId(pedidos) + 1;
+        PedidosItens pedidosItens = new PedidosItens(
+                pedidos,
+                idItem,
+                produtos,
+                pedidosItensDTO.getQuantidade(),
+                produtos.getPreco(),
+                new BigDecimal(pedidosItensDTO.getQuantidade()).multiply(produtos.getPreco())
+        );
+        _pedidosItensRepository.save(pedidosItens);
+
+        atualizaTotalPedido(pedidos);
+
+        return new ResponseDTO("OK", "Item salvo com sucesso");
+    }
+
+    @Transactional
+    public ResponseDTO deleteItemPedido(long idPedido, Integer idItem){
+        Pedidos pedidos = _pedidosRepository.findById(idPedido).orElse(null);
+        if (pedidos == null)
+            return new ResponseDTO("Erro", "Pedido inexistente");
+
+        PedidosItens pedidosItens = _pedidosItensRepository.findByPedidoIdAndItemId(pedidos, idItem);
+        if (pedidosItens == null)
+            return new ResponseDTO("Erro", "Item inexistente");
+
+        _pedidosItensRepository.delete(pedidosItens);
+
+        atualizaTotalPedido(pedidos);
+
+        return new ResponseDTO("OK", "Exclusão realizada com sucesso");
     }
 
 //    //Neste caso o incremento do idItem é automatico na base

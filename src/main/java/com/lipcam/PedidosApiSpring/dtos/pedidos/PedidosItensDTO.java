@@ -4,6 +4,6 @@ import lombok.Data;
 
 @Data
 public class PedidosItensDTO {
-    private  Integer idProduto;
+    private  Long idProduto;
     private Integer quantidade;
 }

@@ -4,11 +4,11 @@ import lombok.Data;
 
 @Data
 public class PedidosItensPK {
-    private Pedidos pedidos;
+    private Pedidos pedidoId;
     private Integer itemId;
 
-    public PedidosItensPK(Pedidos pedidos, Integer itemId) {
-        this.pedidos = pedidos;
+    public PedidosItensPK(Pedidos pedidoId, Integer itemId) {
+        this.pedidoId = pedidoId;
         this.itemId = itemId;
     }
 
