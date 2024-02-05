@@ -2,7 +2,9 @@ package com.lipcam.PedidosApiSpring.services;
 
 import com.lipcam.PedidosApiSpring.dtos.ResponseDTO;
 import com.lipcam.PedidosApiSpring.dtos.pedidos.PedidosDTO;
+import com.lipcam.PedidosApiSpring.dtos.pedidos.PedidosInfoDTO;
 import com.lipcam.PedidosApiSpring.dtos.pedidos.PedidosItensDTO;
+import com.lipcam.PedidosApiSpring.dtos.pedidos.PedidosItensInfoDTO;
 import com.lipcam.PedidosApiSpring.entities.Clientes;
 import com.lipcam.PedidosApiSpring.entities.Pedidos;
 import com.lipcam.PedidosApiSpring.entities.PedidosItens;
@@ -19,7 +21,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
@@ -137,7 +141,7 @@ public class PedidosService {
     }
 
     @Transactional
-    public ResponseDTO deleteItemPedido(long idPedido, Integer idItem){
+    public ResponseDTO deleteItemPedido(Long idPedido, Integer idItem){
         Pedidos pedidos = _pedidosRepository.findById(idPedido).orElse(null);
         if (pedidos == null)
             return new ResponseDTO("Erro", "Pedido inexistente");
@@ -152,6 +156,39 @@ public class PedidosService {
 
         return new ResponseDTO("OK", "Exclusão realizada com sucesso");
     }
+
+    public PedidosInfoDTO getPedidoById(Long idPedido) {
+        Pedidos pedidos = _pedidosRepository.findByIdFetchItens(idPedido);
+        if (pedidos == null)
+            throw  new RuntimeException("Pedido inexistente");
+
+        return convertPedidosInfoDTO(pedidos);
+    }
+
+    private PedidosInfoDTO convertPedidosInfoDTO(Pedidos pedidos){
+        return PedidosInfoDTO.builder().id(pedidos.getId())
+                .nomeCliente(pedidos.getClientes().getNome())
+                .cpfCliente(pedidos.getClientes().getCpf())
+                .dataPedido(pedidos.getDataPedido().format(DateTimeFormatter.ofPattern("dd/MM/yyyy")))
+                .valorTotal(pedidos.getTotal())
+                .itens(convertPedidosItensInfoDTO(pedidos.getItens()))
+                .build();
+    }
+
+    private List<PedidosItensInfoDTO> convertPedidosItensInfoDTO(List<PedidosItens> lstPedidosItens) {
+        if (lstPedidosItens.isEmpty())
+            return Collections.emptyList();
+
+        return lstPedidosItens.stream().map(item -> {
+            return PedidosItensInfoDTO.builder().itemId(item.getItemId())
+                    .descProduto(item.getProdutos().getDescricao())
+                    .quantidade(item.getQuantidade())
+                    .valorUnitario(item.getValorUnitario())
+                    .valorTotal(item.getValorTotal())
+                    .build();
+        }).toList();
+    }
+
 
 //    //Neste caso o incremento do idItem é automatico na base
 //    private List<PedidoItens> converterItens(Pedido pedido, List<PedidosItensDTO> lstPedidosItensDTOS){

@@ -59,12 +59,18 @@ public class PedidosController {
     }
 
     @DeleteMapping(value = "/itens/{idPedido}/{idItem}")
-    public ResponseEntity deleteItemPedido(@PathVariable Integer idPedido, @PathVariable Integer idItem) {
+    public ResponseEntity deleteItemPedido(@PathVariable Long idPedido, @PathVariable Integer idItem) {
         ResponseDTO responseDTO = _service.deleteItemPedido(idPedido, idItem);
 
         if (responseDTO.getResult().equals("OK"))
             return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDTO);
+    }
+
+    @GetMapping(value = "/{id}")
+    public ResponseEntity getPedidoById(@PathVariable Long id){
+
+        return ResponseEntity.status(HttpStatus.OK).body(_service.getPedidoById(id));
     }
 }
