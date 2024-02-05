@@ -9,13 +9,14 @@ import com.lipcam.PedidosApiSpring.entities.Clientes;
 import com.lipcam.PedidosApiSpring.entities.Pedidos;
 import com.lipcam.PedidosApiSpring.entities.PedidosItens;
 import com.lipcam.PedidosApiSpring.entities.Produtos;
+import com.lipcam.PedidosApiSpring.exceptions.CustomMessageException;
+import com.lipcam.PedidosApiSpring.exceptions.RegistroInexistenteException;
 import com.lipcam.PedidosApiSpring.repositories.ClientesRepository;
 import com.lipcam.PedidosApiSpring.repositories.PedidosItensRepository;
 import com.lipcam.PedidosApiSpring.repositories.PedidosRepository;
 import com.lipcam.PedidosApiSpring.repositories.ProdutosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -42,10 +43,10 @@ public class PedidosService {
     ProdutosRepository _produtosRepository;
 
     @Transactional
-    public ResponseEntity addPedido(PedidosDTO pedidosDTO) {
+    public PedidosDTO addPedido(PedidosDTO pedidosDTO) {
         Clientes clientes = _clientesRepository.findById(pedidosDTO.getIdCliente()).orElse(null);
         if (clientes == null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Cliente inexistente"));
+            throw new CustomMessageException("Cliente inexistente", HttpStatus.NOT_FOUND);
 
         Pedidos pedidos = new Pedidos();
         pedidos.setClientes(clientes);
@@ -59,8 +60,7 @@ public class PedidosService {
         atualizaTotalPedido(pedidos);
 
         pedidosDTO.setIdPedido(pedidos.getId());
-        return ResponseEntity.status(HttpStatus.CREATED).body(pedidosDTO);
-        //return ResponseEntity.status(HttpStatus.CREATED).body(new ResponseDTO("OK", "Pedido salvo com sucesso"));
+        return pedidosDTO;
     }
 
     private void atualizaTotalPedido(Pedidos pedidos) {
@@ -85,7 +85,7 @@ public class PedidosService {
             Produtos produtos = _produtosRepository
                     .findById(idProduto)
                     .orElseThrow(
-                            () -> new RuntimeException("Código de produto inválido: " + idProduto)
+                            () -> new CustomMessageException("Código de produto inválido: " + idProduto, HttpStatus.BAD_REQUEST)
                     );
 
             PedidosItens pedidosItens = new PedidosItens(
@@ -103,26 +103,24 @@ public class PedidosService {
 
 
     @Transactional
-    public ResponseDTO deletePedido(Long idPedido){
+    public void deletePedido(Long idPedido){
         Pedidos pedidos = _pedidosRepository.findById(idPedido).orElse(null);
         if (pedidos == null)
-            return new ResponseDTO("Erro", "Pedido inexistente");
+            throw new RegistroInexistenteException();
 
         _pedidosItensRepository.deleteByPedidoId(pedidos);
         _pedidosRepository.delete(pedidos);
-
-        return new ResponseDTO("OK", "Exclusão realizada com sucesso");
     }
 
     @Transactional
-    public ResponseDTO addItemPedido(Long id, PedidosItensDTO pedidosItensDTO) {
+    public PedidosItens addItemPedido(Long id, PedidosItensDTO pedidosItensDTO) {
         Pedidos pedidos = _pedidosRepository.findById(id).orElse(null);
         if (pedidos == null)
-            return new ResponseDTO("Erro", "Pedido inexistente");
+            throw new CustomMessageException("Pedido inexistente", HttpStatus.NOT_FOUND);
 
         Produtos produtos = _produtosRepository.findById(pedidosItensDTO.getIdProduto()).orElse(null);
         if (produtos == null)
-            return new ResponseDTO("Erro", "Produto inexistente");
+            throw new CustomMessageException("Produto inexistente", HttpStatus.NOT_FOUND);
 
         Integer idItem = _pedidosItensRepository.findMaxIdItemByPedidoId(pedidos) + 1;
         PedidosItens pedidosItens = new PedidosItens(
@@ -137,30 +135,28 @@ public class PedidosService {
 
         atualizaTotalPedido(pedidos);
 
-        return new ResponseDTO("OK", "Item salvo com sucesso");
+        return pedidosItens;
     }
 
     @Transactional
-    public ResponseDTO deleteItemPedido(Long idPedido, Integer idItem){
+    public void deleteItemPedido(Long idPedido, Integer idItem){
         Pedidos pedidos = _pedidosRepository.findById(idPedido).orElse(null);
         if (pedidos == null)
-            return new ResponseDTO("Erro", "Pedido inexistente");
+            throw new CustomMessageException("Pedido inexistente", HttpStatus.NOT_FOUND);
 
         PedidosItens pedidosItens = _pedidosItensRepository.findByPedidoIdAndItemId(pedidos, idItem);
         if (pedidosItens == null)
-            return new ResponseDTO("Erro", "Item inexistente");
+            throw new CustomMessageException("Item inexistente", HttpStatus.NOT_FOUND);
 
         _pedidosItensRepository.delete(pedidosItens);
 
         atualizaTotalPedido(pedidos);
-
-        return new ResponseDTO("OK", "Exclusão realizada com sucesso");
     }
 
     public PedidosInfoDTO getPedidoById(Long idPedido) {
         Pedidos pedidos = _pedidosRepository.findByIdFetchItens(idPedido);
         if (pedidos == null)
-            throw  new RuntimeException("Pedido inexistente");
+            throw new CustomMessageException("Pedido inexistente", HttpStatus.NOT_FOUND);
 
         return convertPedidosInfoDTO(pedidos);
     }

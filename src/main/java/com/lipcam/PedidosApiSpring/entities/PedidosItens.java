@@ -9,14 +9,6 @@ import java.math.BigDecimal;
 @Data
 @IdClass(PedidosItensPK.class)
 public class PedidosItens {
-//    @Id
-//    @GeneratedValue(strategy = GenerationType.AUTO)
-//    private Integer id;
-//
-//    @ManyToOne
-//    @JoinColumn(name = "pedido_id")
-//    private Pedido pedido;
-
     @Id
     @ManyToOne
     @JoinColumn(name = "pedido_id")

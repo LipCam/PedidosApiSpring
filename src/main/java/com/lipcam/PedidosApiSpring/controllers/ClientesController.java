@@ -4,6 +4,7 @@ import com.lipcam.PedidosApiSpring.dtos.cliente.AddEditClienteRequestDTO;
 import com.lipcam.PedidosApiSpring.dtos.cliente.ClientesDTO;
 import com.lipcam.PedidosApiSpring.dtos.ResponseDTO;
 import com.lipcam.PedidosApiSpring.entities.Clientes;
+import com.lipcam.PedidosApiSpring.exceptions.CustomMessageException;
 import com.lipcam.PedidosApiSpring.services.ClientesService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -25,58 +26,39 @@ public class ClientesController {
     @GetMapping(value = "/{id}")
     public ResponseEntity findById(@PathVariable Long id) {
         ClientesDTO dto = _service.findById(id);
-        if (dto != null)
-            return ResponseEntity.status(HttpStatus.OK).body(dto);
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Registro inexistente"));
+        return ResponseEntity.status(HttpStatus.OK).body(dto);
     }
 
     @PostMapping
     public ResponseEntity add(@RequestBody AddEditClienteRequestDTO addEditRequestDTO) {
-        ResponseEntity responseEntity = validaCampos(addEditRequestDTO);
-        if(responseEntity != null)
-            return responseEntity;
-
-        return _service.add(addEditRequestDTO);
+        validaCampos(addEditRequestDTO);
+        return ResponseEntity.status(HttpStatus.CREATED).body(_service.add(addEditRequestDTO));
     }
 
     @PutMapping(value = "/{id}")
     public ResponseEntity edit(@PathVariable Long id, @RequestBody AddEditClienteRequestDTO addEditRequestDTO) {
-        ResponseEntity responseEntity = validaCampos(addEditRequestDTO);
-        if(responseEntity != null)
-            return responseEntity;
-
-        ResponseDTO responseDTO = _service.update(id, addEditRequestDTO);
-
-        if (responseDTO.getResult().equals("OK"))
-            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDTO);
+        validaCampos(addEditRequestDTO);
+        _service.update(id, addEditRequestDTO);
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDTO(HttpStatus.OK, "Edição realizada com sucesso"));
     }
 
-    private ResponseEntity validaCampos(AddEditClienteRequestDTO addEditRequestDTO){
+    private void validaCampos(AddEditClienteRequestDTO addEditRequestDTO) {
         if (addEditRequestDTO.getNome() == null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Campo Nome deve ser preenchido"));
+            throw new CustomMessageException("Campo Nome deve ser preenchido", HttpStatus.BAD_REQUEST);
 
         if (addEditRequestDTO.getNome().isEmpty())
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Campo Nome deve ser preenchido"));
+            throw new CustomMessageException("Campo Nome deve ser preenchido", HttpStatus.BAD_REQUEST);
 
         if (addEditRequestDTO.getCpf() == null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Campo CPF deve ser preenchido"));
+            throw new CustomMessageException("Campo CPF deve ser preenchido", HttpStatus.BAD_REQUEST);
 
         if (addEditRequestDTO.getCpf().isEmpty())
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Campo CPF deve ser preenchido"));
-
-        return null;
+            throw new CustomMessageException("Campo CPF deve ser preenchido", HttpStatus.BAD_REQUEST);
     }
 
     @DeleteMapping(value = "/{id}")
     public ResponseEntity delete(@PathVariable Long id) {
-        ResponseDTO responseDTO = _service.delete(id);
-
-        if (responseDTO.getResult().equals("OK"))
-            return ResponseEntity.status(HttpStatus.OK).body(responseDTO);
-
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseDTO);
+        _service.delete(id);
+        return ResponseEntity.status(HttpStatus.OK).body(new ResponseDTO(HttpStatus.OK, "Exclusão realizada com sucesso"));
     }
 }

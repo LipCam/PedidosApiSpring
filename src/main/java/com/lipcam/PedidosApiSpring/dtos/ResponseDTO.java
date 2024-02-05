@@ -1,14 +1,15 @@
 package com.lipcam.PedidosApiSpring.dtos;
 
 import lombok.Data;
+import org.springframework.http.HttpStatus;
 
 @Data
 public class ResponseDTO {
-    String Result;
-    String Message;
+    HttpStatus status;
+    String message;
 
-    public ResponseDTO(String result, String message) {
-        Result = result;
-        Message = message;
+    public ResponseDTO(HttpStatus status, String message) {
+        this.status = status;
+        this.message = message;
     }
 }

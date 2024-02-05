@@ -4,6 +4,8 @@ import com.lipcam.PedidosApiSpring.dtos.ResponseDTO;
 import com.lipcam.PedidosApiSpring.dtos.produto.AddEditProdutoRequestDTO;
 import com.lipcam.PedidosApiSpring.dtos.produto.ProdutosDTO;
 import com.lipcam.PedidosApiSpring.entities.Produtos;
+import com.lipcam.PedidosApiSpring.exceptions.CustomMessageException;
+import com.lipcam.PedidosApiSpring.exceptions.RegistroInexistenteException;
 import com.lipcam.PedidosApiSpring.repositories.ProdutosRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Example;
@@ -29,46 +31,40 @@ public class ProdutosService {
         return _repository.findAll(example);
     }
 
-    public ProdutosDTO findById(Long Id)
-    {
-        Produtos entity =_repository.findById(Id).orElse(null);
-        if(entity != null)
-            return new ProdutosDTO(entity);
-        return null;
+    public ProdutosDTO findById(Long Id) {
+        Produtos entity = _repository.findById(Id).orElse(null);
+        if (entity == null)
+            throw new RegistroInexistenteException();
+
+        return new ProdutosDTO(entity);
     }
 
     @Transactional
-    public ResponseEntity add(AddEditProdutoRequestDTO addEditRequestDTO) {
+    public Produtos add(AddEditProdutoRequestDTO addEditRequestDTO) {
         Produtos entity = _repository.findByDescricao(addEditRequestDTO.getDescricao());
         if (entity != null)
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(new ResponseDTO("Erro", "Produto já existente com esta descrição"));
+            throw new CustomMessageException("Produto já existente com esta descrição", HttpStatus.BAD_REQUEST);
 
-        entity = _repository.save(new Produtos(addEditRequestDTO.getDescricao(), addEditRequestDTO.getPreco()));
-        return ResponseEntity.status(HttpStatus.CREATED).body(entity);
+        return _repository.save(new Produtos(addEditRequestDTO.getDescricao(), addEditRequestDTO.getPreco()));
     }
 
     @Transactional
-    public ResponseDTO update(Long id, AddEditProdutoRequestDTO addEditRequestDTO)
-    {
+    public void update(Long id, AddEditProdutoRequestDTO addEditRequestDTO) {
         Produtos entity = _repository.findById(id).orElse(null);
-        if(entity != null)
-        {
-            entity.setDescricao(addEditRequestDTO.getDescricao());
-            entity.setPreco(addEditRequestDTO.getPreco());
-            _repository.save(entity);
-            return new ResponseDTO("OK", "Edição realizada com sucesso");
-        }
-        return new ResponseDTO("Erro", "Registro inexistente");
+        if (entity == null)
+            throw new RegistroInexistenteException();
+
+        entity.setDescricao(addEditRequestDTO.getDescricao());
+        entity.setPreco(addEditRequestDTO.getPreco());
+        _repository.save(entity);
     }
 
     @Transactional
-    public ResponseDTO delete(Long id) {
+    public void delete(Long id) {
         Produtos entity = _repository.findById(id).orElse(null);
+        if (entity == null)
+            throw new RegistroInexistenteException();
 
-        if(entity != null) {
-            _repository.delete(entity);
-            return new ResponseDTO("OK", "Exclusão realizada com sucesso");
-        }
-        return new ResponseDTO("Erro", "Registro inexistente");
+        _repository.delete(entity);
     }
 }
