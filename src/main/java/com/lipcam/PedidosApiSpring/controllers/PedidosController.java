@@ -6,6 +6,7 @@ import com.lipcam.PedidosApiSpring.dtos.pedidos.PedidosItensDTO;
 import com.lipcam.PedidosApiSpring.entities.PedidosItens;
 import com.lipcam.PedidosApiSpring.exceptions.CustomMessageException;
 import com.lipcam.PedidosApiSpring.services.PedidosService;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -19,10 +20,7 @@ public class PedidosController {
     PedidosService _service;
 
     @PostMapping
-    public ResponseEntity add(@RequestBody PedidosDTO pedidosDTO) {
-        if (pedidosDTO.getIdCliente() == null)
-            throw new CustomMessageException("Informe o Cliente", HttpStatus.BAD_REQUEST);
-
+    public ResponseEntity add(@RequestBody @Valid PedidosDTO pedidosDTO) {
         if (pedidosDTO.getItens() == null)
             throw new CustomMessageException("Informe itens", HttpStatus.BAD_REQUEST);
 
@@ -39,16 +37,7 @@ public class PedidosController {
     }
 
     @PostMapping(value = "/itens/{id}")
-    public ResponseEntity addItemPedido(@PathVariable Long id, @RequestBody PedidosItensDTO pedidosItensDTO) {
-        if (pedidosItensDTO.getIdProduto() == null)
-            throw new CustomMessageException("Informe o Produto", HttpStatus.BAD_REQUEST);
-
-        if (pedidosItensDTO.getQuantidade() == null)
-            throw new CustomMessageException("Informe a quantidade", HttpStatus.BAD_REQUEST);
-
-        if (pedidosItensDTO.getQuantidade() <= 0)
-            throw new CustomMessageException("Quantidade deve ser maior que 0", HttpStatus.BAD_REQUEST);
-
+    public ResponseEntity addItemPedido(@PathVariable Long id, @RequestBody @Valid PedidosItensDTO pedidosItensDTO) {
         PedidosItens pedidosItens = _service.addItemPedido(id, pedidosItensDTO);
         pedidosItensDTO.setItemId(pedidosItens.getItemId());
         return ResponseEntity.status(HttpStatus.CREATED).body(pedidosItensDTO);
